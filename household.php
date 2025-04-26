@@ -22,6 +22,23 @@ class Household {
         }
     }
 
+    // Update household
+    public function update($household_id, $head_name, $address, $region, $registered_date) {
+        try {
+            $stmt = $this->conn->prepare("CALL UpdateHousehold(:household_id, :head_name, :address, :region, :registered_date)");
+            $stmt->execute([
+                ':household_id' => $household_id,
+                ':head_name' => $head_name,
+                ':address' => $address,
+                ':region' => $region,
+                ':registered_date' => $registered_date
+            ]);
+            return true;
+        } catch (PDOException $e) {
+            return $e->getMessage();
+        }
+    }
+
     
     public function getAll() {
         $stmt = $this->conn->query("CALL GetAllHouseholds");
