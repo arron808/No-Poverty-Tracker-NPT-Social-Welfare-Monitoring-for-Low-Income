@@ -28,7 +28,23 @@ class Household {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
     
-    
+    // Delete Household by ID
+    public function delete($household_id) {
+        try {
+            // Assuming you have a stored procedure named 'DeleteHousehold'
+            $stmt = $this->conn->prepare("CALL DeleteHousehold(:household_id)");
+            $stmt->execute([':household_id' => $household_id]);
+
+            // Check if the delete was successful by the number of affected rows
+            if ($stmt->rowCount() > 0) {
+                return true; // Deletion successful
+            } else {
+                return "Error: Household not found or deletion failed.";
+            }
+        } catch (PDOException $e) {
+            return "Error: " . $e->getMessage();
+        }
+    }
 
 }
 ?>

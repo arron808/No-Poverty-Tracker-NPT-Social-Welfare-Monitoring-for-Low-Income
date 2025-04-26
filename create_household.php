@@ -7,6 +7,7 @@ $conn = $database->connect();
 $household = new Household($conn);
 
 $message = "";
+$messageType = "";
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $head_name = $_POST['head_name'];
@@ -15,7 +16,13 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $registered_date = $_POST['registered_date'];
 
     $result = $household->create($head_name, $address, $region, $registered_date);
-    $message = $result === true ? "✅ Household added successfully!" : "❌ Error: $result";
+    if ($result === true) {
+        $message = "Household added successfully!";
+        $messageType = "success"; // green popup
+    } else {
+        $message = "Error: $result";
+        $messageType = "error"; // red popup
+    }
 }
 
 $households = $household->getAll();
@@ -40,14 +47,31 @@ $households = $household->getAll();
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 
-    <!-- Sweet Alert -->
-    <script src="sweetalert2.min.js"></script>
-    <link rel="stylesheet" href="sweetalert2.min.css">
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
         $(document).ready(function() {
             $('#householdTable').DataTable();
         });
+
+        // Delete confirmation with SweetAlert2
+        function confirmDelete(deleteUrl) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "This will delete the household permanently!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, delete it!',
+                cancelButtonText: 'No, cancel!',
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#3085d6',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = deleteUrl; // Proceed with deletion
+                }
+            });
+        }
     </script>
 </head>
 
@@ -59,6 +83,7 @@ $households = $household->getAll();
                 ← Back to Home
             </a>
         </div>
+
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2>Household List</h2>
             <!-- Button trigger modal -->
@@ -66,20 +91,6 @@ $households = $household->getAll();
                 ➕ Add Household
             </button>
         </div>
-
-        <?php if ($message): ?>
-            <script>
-                document.addEventListener('DOMContentLoaded', function() {
-                    Swal.fire({
-                        title: '<?= strpos($message, "✅") !== false ? "Success!" : "Error!" ?>',
-                        text: "<?= strip_tags($message) ?>",
-                        icon: '<?= strpos($message, "✅") !== false ? "success" : "error" ?>',
-                        confirmButtonText: 'OK'
-                    });
-                });
-            </script>
-        <?php endif; ?>
-
 
         <div class="card shadow p-4 mb-5">
             <table id="householdTable" class="table table-striped">
@@ -103,7 +114,7 @@ $households = $household->getAll();
                             <td><?= htmlspecialchars($row['registered_date']) ?></td>
                             <td>
                                 <a class="btn btn-sm btn-warning me-1" href="update_household.php?id=<?= $row['household_id'] ?>">Edit</a>
-                                <a class="btn btn-sm btn-danger" href="delete_household.php?id=<?= $row['household_id'] ?>" onclick="return confirm('Are you sure you want to delete this household?');">Delete</a>
+                                <button class="btn btn-sm btn-danger" onclick="confirmDelete('delete_household.php?delete_id=<?= $row['household_id'] ?>')">Delete</button>
                             </td>
                         </tr>
                     <?php endforeach; ?>
@@ -148,6 +159,18 @@ $households = $household->getAll();
         </div>
     </div>
 
+    <?php if (!empty($message)): ?>
+    <script>
+        Swal.fire({
+            icon: '<?= $messageType ?>', // 'success' or 'error'
+            title: '<?= $messageType === "success" ? "Success!" : "Oops..." ?>',
+            text: '<?= $message ?>',
+            confirmButtonColor: '#3085d6'
+        });
+    </script>
+    <?php endif; ?>
+
+    
 </body>
 
 </html>
