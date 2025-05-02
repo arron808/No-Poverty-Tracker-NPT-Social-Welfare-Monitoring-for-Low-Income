@@ -1,5 +1,5 @@
 <?php
-
+// individual.php
 class Individual {
     private $conn;
 
@@ -24,8 +24,9 @@ class Individual {
             return $e->getMessage();
         }
     }
+
     public function getAll() {
-        $stmt = $this->conn->query("CALL GetAllIndividuals");
+        $stmt = $this->conn->query("CALL GetAllIndividuals()");
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 }

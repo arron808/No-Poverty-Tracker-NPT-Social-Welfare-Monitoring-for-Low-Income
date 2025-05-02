@@ -1,5 +1,5 @@
 <?php
-
+// household.php
 class Household {
     private $conn;
 
@@ -22,13 +22,9 @@ class Household {
         }
     }
 
-    
     public function getAll() {
-        $stmt = $this->conn->query("CALL GetAllHouseholds");
+        $stmt = $this->conn->query("CALL GetAllHouseholds()");
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
-    
-    
-
 }
 ?>
