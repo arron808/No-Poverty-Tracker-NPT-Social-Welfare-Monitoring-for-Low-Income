@@ -29,16 +29,13 @@ $households = $household->getAll();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Household List</title>
 
-    <!-- DataTables -->
+    <!-- DataTables CSS -->
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
-    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-
-    <!-- Bootstrap -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js" integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq" crossorigin="anonymous"></script>
 
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
 
     <script>
         $(document).ready(function() {
@@ -48,7 +45,7 @@ $households = $household->getAll();
 </head>
 
 <body>
-    <h2>Create Households</h2>
+    <h2>Create Household</h2>
     <form method="POST">
         Head Name: <input type="text" name="head_name" required><br>
         Address: <textarea name="address"></textarea><br>
@@ -57,7 +54,7 @@ $households = $household->getAll();
         <button type="submit">Save</button>
     </form>
 
-    <h2>Household Lists</h2>
+    <h2>🏠 Household List</h2>
     <table id="householdTable" class="display">
         <thead>
             <tr>
