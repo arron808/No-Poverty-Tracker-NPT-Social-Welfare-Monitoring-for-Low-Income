@@ -2,6 +2,7 @@
 <html>
 <head>
     <title>NPT Dashboard</title>
+    <link rel="stylesheet" type="text/css" href="style.css">
 </head>
 <body>
     <h1>No Poverty Tracker</h1>
