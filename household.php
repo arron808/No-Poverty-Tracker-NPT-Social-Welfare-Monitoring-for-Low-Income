@@ -22,14 +22,6 @@ class Household {
         }
     }
 
-<<<<<<< HEAD
-    public function getAll() {
-        $stmt = $this->conn->query("CALL GetAllHouseholds()");
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
-}
-?>
-=======
     // Update household
     public function update($household_id, $head_name, $address, $region, $registered_date) {
         try {
@@ -73,4 +65,3 @@ class Household {
 
 }
 ?>
->>>>>>> branch/galang

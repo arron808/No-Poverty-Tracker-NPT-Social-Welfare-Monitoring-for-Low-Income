@@ -24,10 +24,5 @@ class Individual {
             return $e->getMessage();
         }
     }
-
-    public function getAll() {
-        $stmt = $this->conn->query("CALL GetAllIndividuals()");
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-    }
 }
 ?>

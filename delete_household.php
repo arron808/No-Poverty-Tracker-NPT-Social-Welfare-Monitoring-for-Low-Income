@@ -1,20 +1,5 @@
 <?php
 require_once 'database.php';
-<<<<<<< HEAD
-
-$db = new Database();
-$conn = $db->connect();
-
-$id = $_GET['id'] ?? null;
-
-if ($id) {
-    $stmt = $conn->prepare("DELETE FROM households WHERE household_id = ?");
-    $stmt->execute([$id]);
-}
-
-// Redirect back to list
-header("Location: create_household.php");
-=======
 require_once 'household.php'; // Include the Household class
 
 // Create the database connection
@@ -40,5 +25,4 @@ if ($delete_id) {
 
 // Redirect back to the create_household.php page (or the page that displays the list)
 header("Location: create_household.php?message=$message&messageType=$messageType");
->>>>>>> branch/galang
 exit;
