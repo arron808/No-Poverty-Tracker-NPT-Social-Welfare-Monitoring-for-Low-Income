@@ -9,7 +9,7 @@ $program = new Program($conn);
 
 $message = "";
 
-// Handle form submission
+
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $name = $_POST['name'];
     $description = $_POST['description'];
@@ -20,12 +20,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
     $_SESSION['message'] = $result === true ? "✅ Program added successfully!" : "❌ Error: $result";
 
-    // Redirect to prevent form resubmission
     header("Location: create_program.php");
     exit();
 }
 
-// Display message after redirect
+
 if (isset($_SESSION['message'])) {
     $message = $_SESSION['message'];
     unset($_SESSION['message']);
