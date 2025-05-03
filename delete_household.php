@@ -1,16 +1,28 @@
 <?php
 require_once 'database.php';
+require_once 'household.php'; // Include the Household class
 
+// Create the database connection
 $db = new Database();
 $conn = $db->connect();
 
-$id = $_GET['id'] ?? null;
+// Create the Household object
+$household = new Household($conn);
 
-if ($id) {
-    $stmt = $conn->prepare("DELETE FROM households WHERE household_id = ?");
-    $stmt->execute([$id]);
+// Get the ID from the query parameter
+$delete_id = $_GET['delete_id'] ?? null;
+
+if ($delete_id) {
+    $result = $household->delete($delete_id);
+    if ($result === true) {
+        $message = "Household deleted successfully!";
+        $messageType = "success"; // green popup
+    } else {
+        $message = "Error: $result";
+        $messageType = "error"; // red popup
+    }
 }
 
-// Redirect back to list
-header("Location: create_household.php");
+// Redirect back to the create_household.php page (or the page that displays the list)
+header("Location: create_household.php?message=$message&messageType=$messageType");
 exit;
