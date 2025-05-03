@@ -1,5 +1,5 @@
 <?php
-// individual.php
+
 class Individual {
     private $conn;
 

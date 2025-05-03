@@ -1,5 +1,5 @@
 <?php
-// database.php
+
 class Database {
     private $host = "localhost";
     private $db_name = "no_poverty_tracker";

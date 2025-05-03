@@ -1,5 +1,5 @@
 <?php
-// household.php
+
 class Household {
     private $conn;
 
