@@ -1,4 +1,4 @@
-<?php
+<?php //Create_household.php
 require_once 'database.php';
 require_once 'household.php';
 
@@ -28,8 +28,12 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['update'])) {
     $region = $_POST['region'];
     $registered_date = $_POST['registered_date'];
 
-    $result = $household->update($id, $head_name, $address, $region, $registered_date);
-    $message = $result === true ? "✅ Household updated successfully!" : "❌ Error: $result";
+    $stmt = $conn->prepare("UPDATE households SET head_name = ?, address = ?, region = ?, registered_date = ? WHERE household_id = ?");
+    if ($stmt->execute([$head_name, $address, $region, $registered_date, $id])) {
+        $message = "✅ Household updated successfully!";
+    } else {
+        $message = "❌ Update failed.";
+    }
 }
 
 $households = $household->getAll();
@@ -234,4 +238,231 @@ $households = $household->getAll();
     </div>
 </body>
 
+</html>
+
+
+<?php //update_household.php
+require_once 'database.php';
+require_once 'household.php';
+
+$db = new Database();
+$conn = $db->connect();
+$household = new Household($conn);
+
+// Fetch current data
+$id = $_GET['id'] ?? null;
+$current = null;
+if ($id) {
+    $stmt = $conn->prepare("SELECT * FROM households WHERE household_id = ?");
+    $stmt->execute([$id]);
+    $current = $stmt->fetch(PDO::FETCH_ASSOC);
+}
+
+// Update logic
+$message = "";
+if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['update'])) {
+    $head_name = $_POST['head_name'];
+    $address = $_POST['address'];
+    $region = $_POST['region'];
+    $registered_date = $_POST['registered_date'];
+
+    $stmt = $conn->prepare("UPDATE households SET head_name = ?, address = ?, region = ?, registered_date = ? WHERE household_id = ?");
+    if ($stmt->execute([$head_name, $address, $region, $registered_date, $id])) {
+        $message = "✅ Household updated successfully!";
+        $current = $_POST; // refresh modal fields
+    } else {
+        $message = "❌ Update failed.";
+    }
+}
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Household</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            <?php if ($message): ?>
+                Swal.fire({
+                    title: <?= $message === "✅ Household updated successfully!" ? "'Success!'" : "'Error!'" ?>,
+                    text: <?= json_encode(str_replace("✅ ", "", str_replace("❌ ", "", $message))) ?>,
+                    icon: <?= $message === "✅ Household updated successfully!" ? "'success'" : "'error'" ?>,
+                    confirmButtonText: 'OK'
+                });
+            <?php endif; ?>
+        });
+    </script>
+</head>
+
+<body class="bg-light">
+    <div class="container py-4">
+        <h2 class="mb-4 text-center">✏️ Edit Household</h2>
+
+        <!-- Back Button -->
+        <a href="create_household.php" class="btn btn-secondary mb-4">⬅️ Back</a>
+
+        <!-- Update Form -->
+        <form method="POST">
+            <input type="hidden" name="update" value="1">
+
+            <div class="mb-3">
+                <label for="head_name" class="form-label">Head Name</label>
+                <input type="text" class="form-control form-control-lg border-dark shadow-sm" name="head_name" value="<?= htmlspecialchars($current['head_name'] ?? '') ?>" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="address" class="form-label">Address</label>
+                <textarea class="form-control form-control-lg border-dark shadow-sm" name="address" rows="3"><?= htmlspecialchars($current['address'] ?? '') ?></textarea>
+            </div>
+
+            <div class="mb-3">
+                <label for="region" class="form-label">Region</label>
+                <input type="text" class="form-control form-control-lg border-dark shadow-sm" name="region" value="<?= htmlspecialchars($current['region'] ?? '') ?>">
+            </div>
+
+            <div class="mb-3">
+                <label for="registered_date" class="form-label">Registered Date</label>
+                <input type="date" class="form-control form-control-lg border-dark shadow-sm" name="registered_date" value="<?= htmlspecialchars($current['registered_date'] ?? '') ?>">
+            </div>
+
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-success">💾 Update</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
+
+
+<?php //household.php
+
+class Household {
+    private $conn;
+
+    public function __construct($database) {
+        $this->conn = $database;
+    }
+
+    public function create($head_name, $address, $region, $registered_date) {
+        try {
+            $stmt = $this->conn->prepare("CALL CreateHousehold(:head_name, :address, :region, :registered_date)");
+            $stmt->execute([
+                ':head_name' => $head_name,
+                ':address' => $address,
+                ':region' => $region,
+                ':registered_date' => $registered_date
+            ]);
+            return true;
+        } catch (PDOException $e) {
+            return $e->getMessage();
+        }
+    }
+
+    public function getAll() {
+        $stmt = $this->conn->query("CALL GetAllHouseholds()");
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    public function update($id, $head_name, $address, $region, $registered_date) {
+        try {
+            $stmt = $this->conn->prepare("CALL UpdateHousehold(:id, :head_name, :address, :region, :registered_date)");
+            $stmt->execute([
+                ':id' => $id,
+                ':head_name' => $head_name,
+                ':address' => $address,
+                ':region' => $region,
+                ':registered_date' => $registered_date
+            ]);
+            return true;
+        } catch (PDOException $e) {
+            return $e->getMessage();
+        }
+    }
+    
+    public function getById($id) {
+        $stmt = $this->conn->prepare("SELECT * FROM households WHERE household_id = ?");
+        $stmt->execute([$id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+    
+}
+?>
+
+<?php //index.php ?>
+<!DOCTYPE html> 
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>No Poverty Tracker - Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .dashboard-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            color: white;
+        }
+
+        .dashboard-card:hover {
+            transform: scale(1.03);
+            box-shadow: 0 0 15px rgba(0,0,0,0.2);
+        }
+
+        a.text-decoration-none:hover {
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <h1 class="display-5 fw-bold">📊 No Poverty Tracker</h1>
+        <p class="lead">A simple system to manage households, individuals, and welfare programs</p>
+    </div>
+
+    <div class="row justify-content-center g-4">
+        <div class="col-md-4">
+            <a href="create_household.php" class="text-decoration-none">
+                <div class="card dashboard-card bg-primary text-center p-4 border-0 rounded-4">
+                    <h2 class="h4 mb-2">🏠 Households</h2>
+                    <p class="mb-0">Manage household information</p>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a href="create_individual.php" class="text-decoration-none">
+                <div class="card dashboard-card bg-success text-center p-4 border-0 rounded-4">
+                    <h2 class="h4 mb-2">👤 Individuals</h2>
+                    <p class="mb-0">Manage individual data</p>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a href="create_program.php" class="text-decoration-none">
+                <div class="card dashboard-card bg-danger text-center p-4 border-0 rounded-4">
+                    <h2 class="h4 mb-2">🎯 Welfare Programs</h2>
+                    <p class="mb-0">Track and update programs</p>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
 </html>
