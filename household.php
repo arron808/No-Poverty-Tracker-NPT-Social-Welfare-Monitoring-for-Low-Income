@@ -43,11 +43,6 @@ class Household {
         }
     }
     
-    public function getById($id) {
-        $stmt = $this->conn->prepare("SELECT * FROM households WHERE household_id = ?");
-        $stmt->execute([$id]);
-        return $stmt->fetch(PDO::FETCH_ASSOC);
-    }
     
 }
 ?>
