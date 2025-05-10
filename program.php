@@ -1,6 +1,5 @@
 <?php
-
-class Program {
+class program {
     private $conn;
 
     public function __construct($db) {
@@ -9,7 +8,7 @@ class Program {
 
     public function create($name, $description, $provider, $eligibility_criteria) {
         try {
-            $stmt = $this->conn->prepare("CALL CreateProgram(:name, :description, :provider, :eligibility)");
+             $stmt = $this->conn->prepare("CALL CreateProgram(:name, :description, :provider, :eligibility)");
             $stmt->execute([
                 ':name' => $name,
                 ':description' => $description,
@@ -21,5 +20,10 @@ class Program {
             return $e->getMessage();
         }
     }
+
+    public function getAll() {
+        $stmt = $this->conn->query("CALL GetAllprograms()");
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 }
-?>
+?>php
