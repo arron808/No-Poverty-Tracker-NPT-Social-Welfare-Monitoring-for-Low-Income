@@ -1,4 +1,5 @@
-<?php include 'auth.php'; ?>
+<?php
+include 'auth.php'; ?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -28,9 +29,14 @@
 
 <body>
     <div class="container py-5">
-        <div class="text-center mb-5">
-            <h1 class="display-5 fw-bold">📊 No Poverty Tracker</h1>
-            <p class="lead">A simple system to manage households, individuals, and welfare programs</p>
+        <div class="d-flex justify-content-between mb-4">
+            <div>
+                <h1 class="display-5 fw-bold">📊 No Poverty Tracker</h1>
+                <p class="lead">A simple system to manage households, individuals, and welfare programs</p>
+            </div>
+            <div class="align-self-start">
+                <a href="logout.php" class="btn btn-outline-danger">Logout</a>
+            </div>
         </div>
 
         <div class="row justify-content-center g-4">
@@ -63,6 +69,7 @@
                     <div class="card dashboard-card bg-warning text-center p-4 border-0 rounded-4">
                         <h2 class="h4 mb-2">👥 Manage Users</h2>
                         <p class="mb-0">Add or remove system users</p>
+
                     </div>
                 </a>
             </div>
