@@ -33,18 +33,72 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['update'])) {
 }
 ?>
 
-<!-- Floating modal layout -->
-<div style="padding: 20px; max-width: 500px;">
-    <h3>Edit Household</h3>
-    <?php if ($message): ?><p><?= $message ?></p><?php endif; ?>
+<!DOCTYPE html>
+<html lang="en">
 
-    <form method="POST">
-        <input type="hidden" name="update" value="1">
-        Head Name: <input type="text" name="head_name" value="<?= htmlspecialchars($current['head_name'] ?? '') ?>" required><br><br>
-        Address: <textarea name="address"><?= htmlspecialchars($current['address'] ?? '') ?></textarea><br><br>
-        Region: <input type="text" name="region" value="<?= htmlspecialchars($current['region'] ?? '') ?>"><br><br>
-        Registered Date: <input type="date" name="registered_date" value="<?= htmlspecialchars($current['registered_date'] ?? '') ?>"><br><br>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Household</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-        <button type="submit">Update</button>
-    </form>
-</div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            <?php if ($message): ?>
+                Swal.fire({
+                    title: <?= $message === "✅ Household updated successfully!" ? "'Success!'" : "'Error!'" ?>,
+                    text: <?= json_encode(str_replace("✅ ", "", str_replace("❌ ", "", $message))) ?>,
+                    icon: <?= $message === "✅ Household updated successfully!" ? "'success'" : "'error'" ?>,
+                    confirmButtonText: 'OK'
+                });
+            <?php endif; ?>
+        });
+    </script>
+</head>
+
+<body class="bg-light">
+    <div class="container py-4">
+        <h2 class="mb-4 text-center">✏️ Edit Household</h2>
+
+        <!-- Back Button -->
+        <a href="create_household.php" class="btn btn-secondary mb-4">⬅️ Back</a>
+
+        <!-- Update Form -->
+        <form method="POST">
+            <input type="hidden" name="update" value="1">
+
+            <div class="mb-3">
+                <label for="head_name" class="form-label">Head Name</label>
+                <input type="text" class="form-control form-control-lg border-dark shadow-sm" name="head_name" value="<?= htmlspecialchars($current['head_name'] ?? '') ?>" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="address" class="form-label">Address</label>
+                <textarea class="form-control form-control-lg border-dark shadow-sm" name="address" rows="3"><?= htmlspecialchars($current['address'] ?? '') ?></textarea>
+            </div>
+
+            <div class="mb-3">
+                <label for="region" class="form-label">Region</label>
+                <input type="text" class="form-control form-control-lg border-dark shadow-sm" name="region" value="<?= htmlspecialchars($current['region'] ?? '') ?>">
+            </div>
+
+            <div class="mb-3">
+                <label for="registered_date" class="form-label">Registered Date</label>
+                <input type="date" class="form-control form-control-lg border-dark shadow-sm" name="registered_date" value="<?= htmlspecialchars($current['registered_date'] ?? '') ?>">
+            </div>
+
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-success">💾 Update</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
