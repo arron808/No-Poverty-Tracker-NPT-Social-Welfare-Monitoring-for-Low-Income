@@ -7,29 +7,32 @@ $conn = $database->connect();
 $household = new Household($conn);
 
 $message = "";
-$messageType = "";
+$result = null;
 
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    if (isset($_POST['create'])) {
-        $head_name = $_POST['head_name'];
-        $address = $_POST['address'];
-        $region = $_POST['region'];
-        $registered_date = $_POST['registered_date'];
+// Add new household logic
+if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['add'])) {
+    $head_name = $_POST['head_name'];
+    $address = $_POST['address'];
+    $region = $_POST['region'];
+    $registered_date = $_POST['registered_date'];
 
-        $result = $household->create($head_name, $address, $region, $registered_date);
-        $message = $result === true ? "✅ Household added successfully!" : "❌ Error: $result";
-        $messageType = $result === true ? "success" : "error";
+    $result = $household->create($head_name, $address, $region, $registered_date);
+    $message = $result === true ? "✅ Household added successfully!" : "❌ Error: $result";
+}
 
-    } elseif (isset($_POST['update'])) {
-        $household_id = $_POST['household_id'];
-        $head_name = $_POST['head_name'];
-        $address = $_POST['address'];
-        $region = $_POST['region'];
-        $registered_date = $_POST['registered_date'];
+// Update household logic (handling form submission for the modal)
+if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['update'])) {
+    $id = $_POST['household_id'];
+    $head_name = $_POST['head_name'];
+    $address = $_POST['address'];
+    $region = $_POST['region'];
+    $registered_date = $_POST['registered_date'];
 
-        $result = $household->update($household_id, $head_name, $address, $region, $registered_date);
-        $message = $result === true ? "✅ Household updated successfully!" : "❌ Error: $result";
-        $messageType = $result === true ? "success" : "error";
+    $stmt = $conn->prepare("UPDATE households SET head_name = ?, address = ?, region = ?, registered_date = ? WHERE household_id = ?");
+    if ($stmt->execute([$head_name, $address, $region, $registered_date, $id])) {
+        $message = "✅ Household updated successfully!";
+    } else {
+        $message = "❌ Update failed.";
     }
 }
 
@@ -41,183 +44,181 @@ $households = $household->getAll();
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Household List</title>
 
-    <!-- Bootstrap -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- DataTables CSS with Bootstrap 5 -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
 
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
-
-    <!-- DataTables -->
-    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- DataTables JS -->
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
 
-    <!-- SweetAlert -->
-    <script src="sweetalert2.min.js"></script>
-    <link rel="stylesheet" href="sweetalert2.min.css">
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
-    $(document).ready(function() {
-        $('#householdTable').DataTable();
-
-        <?php if ($message): ?>
-        Swal.fire({
-            icon: '<?= $messageType ?>',
-            title: '<?= $message ?>',
-            timer: 1500,
-            showConfirmButton: false
-        });
-        <?php endif; ?>
-
-        // Fill edit modal
-        $('.btn-edit').on('click', function() {
-            var id = $(this).data('id');
-            var head_name = $(this).data('head_name');
-            var address = $(this).data('address');
-            var region = $(this).data('region');
-            var registered_date = $(this).data('registered_date');
-
-            $('#editHouseholdModal input[name="household_id"]').val(id);
-            $('#editHouseholdModal input[name="head_name"]').val(head_name);
-            $('#editHouseholdModal textarea[name="address"]').val(address);
-            $('#editHouseholdModal input[name="region"]').val(region);
-            $('#editHouseholdModal input[name="registered_date"]').val(registered_date);
-
-            var editModal = new bootstrap.Modal(document.getElementById('editHouseholdModal'));
-            editModal.show();
+        $(document).ready(function () {
+            $('#householdTable').DataTable();
         });
 
-        // Open create modal
-        $('#openCreateModal').on('click', function() {
-            var createModal = new bootstrap.Modal(document.getElementById('createHouseholdModal'));
-            createModal.show();
+        // Pre-fill the modal with the household data when "Edit" is clicked
+        function editHousehold(id) {
+            // Find the household from the table
+            var row = $('#householdTable').find('tr[data-id="' + id + '"]');
+            var head_name = row.find('.head_name').text();
+            var address = row.find('.address').text();
+            var region = row.find('.region').text();
+            var registered_date = row.find('.registered_date').text();
+
+            $('#household_id').val(id);
+            $('#edit_head_name').val(head_name);
+            $('#edit_address').val(address);
+            $('#edit_region').val(region);
+            $('#edit_registered_date').val(registered_date);
+
+            $('#editHouseholdModal').modal('show');
+        }
+
+        // SweetAlert for success/error message
+        $(document).ready(function () {
+            <?php if ($message): ?>
+                Swal.fire({
+                    title: '<?= $message === "✅ Household added successfully!" || $message === "✅ Household updated successfully!" ? "Success!" : "Error!" ?>',
+                    text: '<?= $message ?>',
+                    icon: '<?= $message === "✅ Household added successfully!" || $message === "✅ Household updated successfully!" ? "success" : "error" ?>',
+                    confirmButtonText: 'OK'
+                });
+            <?php endif; ?>
         });
-    });
     </script>
-
 </head>
 
-<body class="p-4 bg-light">
+<body class="bg-light">
+    <div class="container py-4">
+        <h2 class="mb-4 text-center">🏠 No Poverty Tracker - Household Management</h2>
 
-<div class="container bg-white p-4 rounded shadow">
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <h2>Household Management</h2>
-        <div>
-            <button id="openCreateModal" class="btn btn-success">➕ Add Household</button>
-            <a href="index.php" class="btn btn-secondary ms-2">⬅️ Back to Index</a>
+        <!-- Button to trigger modal -->
+        <button class="btn btn-primary mb-4" data-bs-toggle="modal" data-bs-target="#addHouseholdModal">+ Add Household</button>
+
+        <!-- Modal Form for Adding Household -->
+        <div class="modal fade" id="addHouseholdModal" tabindex="-1" aria-labelledby="addHouseholdModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="addHouseholdModalLabel">Add New Household</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form method="POST">
+                            <input type="hidden" name="add" value="1">
+                            <div class="mb-3">
+                                <label for="head_name" class="form-label">Head Name</label>
+                                <input type="text" class="form-control form-control-lg" name="head_name" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="address" class="form-label">Address</label>
+                                <textarea class="form-control form-control-lg" name="address" rows="2"></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="region" class="form-label">Region</label>
+                                <input type="text" class="form-control form-control-lg" name="region">
+                            </div>
+                            <div class="mb-3">
+                                <label for="registered_date" class="form-label">Registered Date</label>
+                                <input type="date" class="form-control form-control-lg" name="registered_date">
+                            </div>
+                            <div class="modal-footer">
+                                <button type="submit" class="btn btn-success">💾 Save</button>
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Household Table -->
+        <div class="card">
+            <div class="card-header bg-dark text-white">
+                Household List
+            </div>
+            <div class="card-body">
+                <table id="householdTable" class="table table-striped table-bordered">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>ID</th>
+                            <th>Head Name</th>
+                            <th>Address</th>
+                            <th>Region</th>
+                            <th>Registered Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <?php foreach ($households as $row): ?>
+                            <tr data-id="<?= htmlspecialchars($row['household_id']) ?>">
+                                <td><?= htmlspecialchars($row['household_id']) ?></td>
+                                <td class="head_name"><?= htmlspecialchars($row['head_name']) ?></td>
+                                <td class="address"><?= htmlspecialchars($row['address']) ?></td>
+                                <td class="region"><?= htmlspecialchars($row['region']) ?></td>
+                                <td class="registered_date"><?= htmlspecialchars($row['registered_date']) ?></td>
+                                <td>
+                                    <button class="btn btn-sm btn-warning" onclick="editHousehold(<?= $row['household_id'] ?>)">✏️ Edit</button>
+                                    <a class="btn btn-sm btn-danger" href="delete_household.php?id=<?= $row['household_id'] ?>" onclick="return confirm('Are you sure you want to delete this household?');">🗑️ Delete</a>
+                                </td>
+                            </tr>
+                        <?php endforeach; ?>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 
-    <table id="householdTable" class="display table table-striped">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Head Name</th>
-                <th>Address</th>
-                <th>Region</th>
-                <th>Registered Date</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php foreach ($households as $row): ?>
-            <tr>
-                <td><?= htmlspecialchars($row['household_id']) ?></td>
-                <td><?= htmlspecialchars($row['head_name']) ?></td>
-                <td><?= htmlspecialchars($row['address']) ?></td>
-                <td><?= htmlspecialchars($row['region']) ?></td>
-                <td><?= htmlspecialchars($row['registered_date']) ?></td>
-                <td>
-                    <button 
-                        class="btn btn-sm btn-warning btn-edit"
-                        data-id="<?= $row['household_id'] ?>"
-                        data-head_name="<?= htmlspecialchars($row['head_name'], ENT_QUOTES) ?>"
-                        data-address="<?= htmlspecialchars($row['address'], ENT_QUOTES) ?>"
-                        data-region="<?= htmlspecialchars($row['region'], ENT_QUOTES) ?>"
-                        data-registered_date="<?= $row['registered_date'] ?>"
-                    >Edit</button>
-
-                    <a class="btn btn-sm btn-danger" href="delete_household.php?delete_id=<?= $row['household_id'] ?>" onclick="return confirm('Are you sure?');">Delete</a>
-                </td>
-            </tr>
-            <?php endforeach; ?>
-        </tbody>
-    </table>
-</div>
-
-<!-- Create Modal -->
-<div class="modal fade" id="createHouseholdModal" tabindex="-1" aria-labelledby="createHouseholdModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <form method="POST" class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="createHouseholdModalLabel">Create Household</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <input type="hidden" name="create" value="1">
-                <div class="mb-3">
-                    <label>Head Name:</label>
-                    <input type="text" name="head_name" class="form-control" required>
+    <!-- Modal Form for Editing Household -->
+    <div class="modal fade" id="editHouseholdModal" tabindex="-1" aria-labelledby="editHouseholdModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editHouseholdModalLabel">Edit Household</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="mb-3">
-                    <label>Address:</label>
-                    <textarea name="address" class="form-control"></textarea>
-                </div>
-                <div class="mb-3">
-                    <label>Region:</label>
-                    <input type="text" name="region" class="form-control">
-                </div>
-                <div class="mb-3">
-                    <label>Registered Date:</label>
-                    <input type="date" name="registered_date" class="form-control">
+                <div class="modal-body">
+                    <form method="POST">
+                        <input type="hidden" name="update" value="1">
+                        <input type="hidden" name="household_id" id="household_id">
+                        <div class="mb-3">
+                            <label for="edit_head_name" class="form-label">Head Name</label>
+                            <input type="text" class="form-control" id="edit_head_name" name="head_name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit_address" class="form-label">Address</label>
+                            <textarea class="form-control" id="edit_address" name="address" rows="2"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit_region" class="form-label">Region</label>
+                            <input type="text" class="form-control" id="edit_region" name="region">
+                        </div>
+                        <div class="mb-3">
+                            <label for="edit_registered_date" class="form-label">Registered Date</label>
+                            <input type="date" class="form-control" id="edit_registered_date" name="registered_date">
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-success">💾 Update</button>
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        </div>
+                    </form>
                 </div>
             </div>
-            <div class="modal-footer">
-                <button type="submit" class="btn btn-success">Save Household</button>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-            </div>
-        </form>
+        </div>
     </div>
-</div>
-
-<!-- Edit Modal -->
-<div class="modal fade" id="editHouseholdModal" tabindex="-1" aria-labelledby="editHouseholdModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-        <form method="POST" class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="editHouseholdModalLabel">Edit Household</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <input type="hidden" name="update" value="1">
-                <input type="hidden" name="household_id">
-                <div class="mb-3">
-                    <label>Head Name:</label>
-                    <input type="text" name="head_name" class="form-control" required>
-                </div>
-                <div class="mb-3">
-                    <label>Address:</label>
-                    <textarea name="address" class="form-control"></textarea>
-                </div>
-                <div class="mb-3">
-                    <label>Region:</label>
-                    <input type="text" name="region" class="form-control">
-                </div>
-                <div class="mb-3">
-                    <label>Registered Date:</label>
-                    <input type="date" name="registered_date" class="form-control">
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="submit" class="btn btn-primary">Update Household</button>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-            </div>
-        </form>
-    </div>
-</div>
-
 </body>
 
 </html>

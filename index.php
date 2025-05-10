@@ -2,35 +2,63 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>No Poverty Tracker - Home</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>No Poverty Tracker - Dashboard</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .dashboard-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            color: white;
+        }
+
+        .dashboard-card:hover {
+            transform: scale(1.03);
+            box-shadow: 0 0 15px rgba(0,0,0,0.2);
+        }
+
+        a.text-decoration-none:hover {
+            text-decoration: none;
+        }
+    </style>
 </head>
-<body class="bg-light">
-
-    <div class="container py-5">
-        <div class="row justify-content-center">
-            <div class="col-md-8">
-                <div class="card shadow-sm">
-                    <div class="card-header bg-primary text-white text-center">
-                        <h3 class="mb-0">No Poverty Tracker</h3>
-                    </div>
-                    <div class="card-body text-center">
-                        <p class="lead">Welcome to the No Poverty Tracker System</p>
-                        <div class="d-grid gap-3 col-6 mx-auto mt-4">
-                            <a href="create_household.php" class="btn btn-success btn-lg">Households</a>
-                            <a href="create_household.php" class="btn btn-success btn-lg">Individuals</a>
-                            <a href="create_household.php" class="btn btn-success btn-lg">Welfare Programs</a>
-
-                            <a href="logout.php" class="btn btn-danger btn-lg">Logout</a>
-                        </div>
-                    </div>
-                    <div class="card-footer text-muted text-center">
-                        &copy; <?= date('Y') ?> No Poverty Tracker
-                    </div>
-                </div>
-            </div>
-        </div>
+<body>
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <h1 class="display-5 fw-bold">📊 No Poverty Tracker</h1>
+        <p class="lead">A simple system to manage households, individuals, and welfare programs</p>
     </div>
 
+    <div class="row justify-content-center g-4">
+        <div class="col-md-4">
+            <a href="create_household.php" class="text-decoration-none">
+                <div class="card dashboard-card bg-primary text-center p-4 border-0 rounded-4">
+                    <h2 class="h4 mb-2">🏠 Households</h2>
+                    <p class="mb-0">Manage household information</p>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a href="create_individual.php" class="text-decoration-none">
+                <div class="card dashboard-card bg-success text-center p-4 border-0 rounded-4">
+                    <h2 class="h4 mb-2">👤 Individuals</h2>
+                    <p class="mb-0">Manage individual data</p>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-4">
+            <a href="create_program.php" class="text-decoration-none">
+                <div class="card dashboard-card bg-danger text-center p-4 border-0 rounded-4">
+                    <h2 class="h4 mb-2">🎯 Welfare Programs</h2>
+                    <p class="mb-0">Track and update programs</p>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

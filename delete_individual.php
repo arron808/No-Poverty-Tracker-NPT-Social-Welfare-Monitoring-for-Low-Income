@@ -7,10 +7,10 @@ $conn = $db->connect();
 $id = $_GET['id'] ?? null;
 
 if ($id) {
-    $stmt = $conn->prepare("DELETE FROM households WHERE household_id = ?");
+    $stmt = $conn->prepare("DELETE FROM individuals WHERE household_id = ?");
     $stmt->execute([$id]);
 }
 
 // Redirect back to list
-header("Location: create_household.php");
+header("Location: create_individual.php");
 exit;
