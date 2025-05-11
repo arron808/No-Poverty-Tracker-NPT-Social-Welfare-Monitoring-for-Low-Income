@@ -73,6 +73,14 @@ include 'auth.php'; ?>
                     </div>
                 </a>
             </div>
+            <div class="col-md-4">
+                <a href="create_enrollment.php" class="text-decoration-none">
+                    <div class="card dashboard-card bg-warning text-center p-4 border-0 rounded-4">
+                        <h2 class="h4 mb-2">📥 Enrollments</h2>
+                        <p class="mb-0">Enroll households into programs</p>
+                    </div>
+                </a>
+            </div>
         </div>
     </div>
 
