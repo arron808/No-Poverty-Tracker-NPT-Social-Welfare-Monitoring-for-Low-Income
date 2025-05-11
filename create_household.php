@@ -1,7 +1,7 @@
 <?php
 require_once 'database.php';
 require_once 'household.php';
-
+require_once 'auth.php';
 $database = new Database();
 $conn = $database->connect();
 $household = new Household($conn);

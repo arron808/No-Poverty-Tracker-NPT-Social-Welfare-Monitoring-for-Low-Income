@@ -2,7 +2,7 @@
 session_start();
 require_once 'database.php';
 require_once 'program.php';
-
+require_once 'auth.php';
 $db = new Database();
 $conn = $db->connect();
 $program = new Program($conn);

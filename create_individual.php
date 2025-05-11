@@ -1,7 +1,7 @@
 <?php
 require_once 'database.php';
 require_once 'individual.php';
-
+require_once 'auth.php';
 $db = new Database();
 $conn = $db->connect();
 $individual = new Individual($conn);

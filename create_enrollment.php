@@ -1,5 +1,6 @@
 <?php
 session_start();
+require_once 'auth.php';
 require_once 'database.php';
 require_once 'enrollment.php';
 require_once 'program.php';
