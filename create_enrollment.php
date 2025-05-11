@@ -47,6 +47,7 @@ $enrollments = $enrollment->getAll();
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Enroll Household</title>
@@ -56,151 +57,163 @@ $enrollments = $enrollment->getAll();
     <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
     <script>
-        $(document).ready(function () {
+        $(document).ready(function() {
             $('#enrollmentTable').DataTable();
         });
     </script>
 </head>
+
 <body class="bg-light">
-<div class="container mt-5">
-    <h2 class="mb-4 text-center">🏠 Enroll Household to Program</h2>
+    <div class="container mt-5">
+        <h2 class="mb-4 text-center">🏠 Enroll Household to Program</h2>
 
-    <div class="text-end mb-3">
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#enrollModal">➕ Enroll</button>
+        <div class="text-end mb-3">
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#enrollModal">➕ Enroll</button>
+        </div>
+
+        <!-- Enroll Modal -->
+        <div class="modal fade" id="enrollModal" tabindex="-1" aria-labelledby="enrollModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <form method="POST" class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Enroll Household</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="household_id" class="form-label">Select Household</label>
+                            <select name="household_id" id="household_id" class="form-select" required>
+                                <option value="">-- Choose Household --</option>
+                                <?php foreach ($households as $h): ?>
+                                    <option value="<?= $h['household_id'] ?>"><?= htmlspecialchars($h['head_name']) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="program_id" class="form-label">Select Program</label>
+                            <select name="program_id" id="program_id" class="form-select" required>
+                                <option value="">-- Choose Program --</option>
+                                <?php foreach ($programs as $p): ?>
+                                    <option value="<?= $p['program_id'] ?>"><?= htmlspecialchars($p['name']) ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-success">💾 Enroll</button>
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Message -->
+        <?php if ($message): ?>
+            <div class="alert <?= str_starts_with($message, '✅') ? 'alert-success' : 'alert-danger' ?> text-center">
+                <?= htmlspecialchars($message) ?>
+            </div>
+        <?php endif; ?>
+
+        <!-- Enrollment Table -->
+        <table class="table table-bordered" id="enrollmentTable">
+            <thead>
+                <tr>
+                    <th>Household</th>
+                    <th>Program</th>
+                    <th>Date Enrolled</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php
+                $modalHtml = ''; // Start collecting modals
+
+                foreach ($enrollments as $enroll): ?>
+                    <tr>
+                        <td><?= htmlspecialchars($enroll['head_name']) ?></td>
+                        <td><?= htmlspecialchars($enroll['program_name']) ?></td>
+                        <td><?= htmlspecialchars($enroll['date_enrolled']) ?></td>
+                        <td>
+                            <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#editEnrollmentModal<?= $enroll['enrollment_id'] ?>">✏️ Edit</button>
+                            <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteEnrollmentModal<?= $enroll['enrollment_id'] ?>">🗑️ Delete</button>
+                        </td>
+                    </tr>
+
+
+
+                <?php endforeach; ?>
+            </tbody>
+
+
+        </table>
+
     </div>
-
-    <!-- Enroll Modal -->
-    <div class="modal fade" id="enrollModal" tabindex="-1" aria-labelledby="enrollModalLabel" aria-hidden="true">
+    <!-- Edit Enrollment Modal -->
+    <div class="modal fade" id="editEnrollmentModal<?= $enroll['enrollment_id'] ?>" tabindex="-1" aria-labelledby="editEnrollmentModalLabel<?= $enroll['enrollment_id'] ?>" aria-hidden="true">
         <div class="modal-dialog">
             <form method="POST" class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Enroll Household</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <input type="hidden" name="action" value="edit">
+                <input type="hidden" name="enrollment_id" value="<?= $enroll['enrollment_id'] ?>">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="editEnrollmentModalLabel<?= $enroll['enrollment_id'] ?>">✏️ Edit Enrollment</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <div class="mb-3">
-                        <label for="household_id" class="form-label">Select Household</label>
-                        <select name="household_id" id="household_id" class="form-select" required>
-                            <option value="">-- Choose Household --</option>
+                    <div class="form-group mb-3">
+                        <label for="household_id_<?= $enroll['enrollment_id'] ?>" class="form-label">Household</label>
+                        <select name="household_id" id="household_id_<?= $enroll['enrollment_id'] ?>" class="form-select" required>
                             <?php foreach ($households as $h): ?>
-                                <option value="<?= $h['household_id'] ?>"><?= htmlspecialchars($h['head_name']) ?></option>
+                                <option value="<?= $h['household_id'] ?>" <?= $enroll['household_id'] == $h['household_id'] ? 'selected' : '' ?>>
+                                    <?= htmlspecialchars($h['head_name']) ?>
+                                </option>
                             <?php endforeach; ?>
                         </select>
                     </div>
-                    <div class="mb-3">
-                        <label for="program_id" class="form-label">Select Program</label>
-                        <select name="program_id" id="program_id" class="form-select" required>
-                            <option value="">-- Choose Program --</option>
+                    <div class="form-group mb-3">
+                        <label for="program_id_<?= $enroll['enrollment_id'] ?>" class="form-label">Program</label>
+                        <select name="program_id" id="program_id_<?= $enroll['enrollment_id'] ?>" class="form-select" required>
                             <?php foreach ($programs as $p): ?>
-                                <option value="<?= $p['program_id'] ?>"><?= htmlspecialchars($p['name']) ?></option>
+                                <option value="<?= $p['program_id'] ?>" <?= $enroll['program_id'] == $p['program_id'] ? 'selected' : '' ?>>
+                                    <?= htmlspecialchars($p['name']) ?>
+                                </option>
                             <?php endforeach; ?>
                         </select>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" class="btn btn-success">💾 Enroll</button>
+                    <button type="submit" class="btn btn-success">💾 Update</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <!-- Delete Enrollment Modal -->
+    <div class="modal fade" id="deleteEnrollmentModal<?= $enroll['enrollment_id'] ?>" tabindex="-1" aria-labelledby="deleteEnrollmentModalLabel<?= $enroll['enrollment_id'] ?>" aria-hidden="true">
+        <div class="modal-dialog">
+            <form method="POST" class="modal-content">
+                <input type="hidden" name="action" value="delete">
+                <input type="hidden" name="enrollment_id" value="<?= $enroll['enrollment_id'] ?>">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="deleteEnrollmentModalLabel<?= $enroll['enrollment_id'] ?>">🗑️ Confirm Deletion</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p class="mb-0">Are you sure you want to delete the enrollment of:</p>
+                    <ul>
+                        <li><strong>Household:</strong> <?= htmlspecialchars($enroll['head_name']) ?></li>
+                        <li><strong>Program:</strong> <?= htmlspecialchars($enroll['program_name']) ?></li>
+                    </ul>
+                    <p>This action cannot be undone.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-danger">Yes, Delete</button>
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 </div>
             </form>
         </div>
     </div>
 
-    <!-- Message -->
-    <?php if ($message): ?>
-        <div class="alert <?= str_starts_with($message, '✅') ? 'alert-success' : 'alert-danger' ?> text-center">
-            <?= htmlspecialchars($message) ?>
-        </div>
-    <?php endif; ?>
-
-    <!-- Enrollment Table -->
-    <table class="table table-bordered" id="enrollmentTable">
-        <thead>
-        <tr>
-            <th>Household</th>
-            <th>Program</th>
-            <th>Date Enrolled</th>
-            <th>Actions</th>
-        </tr>
-        </thead>
-        <tbody>
-        <?php foreach ($enrollments as $enroll): ?>
-            <tr>
-                <td><?= htmlspecialchars($enroll['head_name']) ?></td>
-                <td><?= htmlspecialchars($enroll['program_name']) ?></td>
-                <td><?= htmlspecialchars($enroll['date_enrolled']) ?></td>
-                <td>
-                    <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#editEnrollmentModal<?= $enroll['enrollment_id'] ?>">✏️ Edit</button>
-                    <button class="btn btn-sm btn-danger" data-bs-toggle="modal" data-bs-target="#deleteEnrollmentModal<?= $enroll['enrollment_id'] ?>">🗑️ Delete</button>
-                </td>
-            </tr>
-
-            <!-- Edit Modal -->
-            <div class="modal fade" id="editEnrollmentModal<?= $enroll['enrollment_id'] ?>" tabindex="-1">
-                <div class="modal-dialog">
-                    <form method="POST" class="modal-content">
-                        <input type="hidden" name="action" value="edit">
-                        <input type="hidden" name="enrollment_id" value="<?= $enroll['enrollment_id'] ?>">
-                        <div class="modal-header">
-                            <h5 class="modal-title">Edit Enrollment</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                        </div>
-                        <div class="modal-body">
-                            <div class="mb-3">
-                                <label>Household</label>
-                                <select name="household_id" class="form-select" required>
-                                    <?php foreach ($households as $hh): ?>
-                                        <option value="<?= $hh['household_id'] ?>" <?= $hh['household_id'] == $enroll['household_id'] ? 'selected' : '' ?>>
-                                            <?= htmlspecialchars($hh['head_name']) ?>
-                                        </option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-                            <div class="mb-3">
-                                <label>Program</label>
-                                <select name="program_id" class="form-select" required>
-                                    <?php foreach ($programs as $pg): ?>
-                                        <option value="<?= $pg['program_id'] ?>" <?= $pg['program_id'] == $enroll['program_id'] ? 'selected' : '' ?>>
-                                            <?= htmlspecialchars($pg['name']) ?>
-                                        </option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="modal-footer">
-                            <button class="btn btn-primary">Save Changes</button>
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
-            <!-- Delete Modal -->
-            <div class="modal fade" id="deleteEnrollmentModal<?= $enroll['enrollment_id'] ?>" tabindex="-1">
-                <div class="modal-dialog">
-                    <form method="POST" class="modal-content">
-                        <input type="hidden" name="action" value="delete">
-                        <input type="hidden" name="enrollment_id" value="<?= $enroll['enrollment_id'] ?>">
-                        <div class="modal-header">
-                            <h5 class="modal-title">Confirm Deletion</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                        </div>
-                        <div class="modal-body">
-                            Are you sure you want to delete this enrollment?
-                        </div>
-                        <div class="modal-footer">
-                            <button class="btn btn-danger">Yes, Delete</button>
-                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                        </div>
-                    </form>
-                </div>
-            </div>
-
-        <?php endforeach; ?>
-        </tbody>
-    </table>
-
-</div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>
