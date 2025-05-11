@@ -1,49 +1,28 @@
 <?php
 session_start();
 require_once 'database.php';
+require_once 'User.php';
 
-$db = new Database();
-$conn = $db->connect();
+$database = new Database();
+$conn = $database->connect();
+$user = new User($conn);
 
-// ADD USER
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_user'])) {
-    $username = $_POST['username'];
-    $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
-
-    $stmt = $conn->prepare("INSERT INTO users (username, password) VALUES (?, ?)");
-    $stmt->execute([$username, $password]);
-    header("Location: manage_users.php");
-    exit;
-}
-
-// EDIT USER
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['edit_user'])) {
-    $id = $_POST['user_id'];
-    $username = $_POST['username'];
-    $password = !empty($_POST['password']) ? password_hash($_POST['password'], PASSWORD_DEFAULT) : null;
-
-    if ($password) {
-        $stmt = $conn->prepare("UPDATE users SET username = ?, password_hash = ? WHERE user_id = ?");
-        $stmt->execute([$username, $password, $id]);
-    } else {
-        $stmt = $conn->prepare("UPDATE users SET username = ? WHERE id = ?");
-        $stmt->execute([$username, $id]);
+// Handle form actions (add, edit, delete)
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (isset($_POST['add_user'])) {
+        $user->createUser($_POST['username'], $_POST['password_hash']);
+    } elseif (isset($_POST['edit_user'])) {
+        $user->updateUser($_POST['user_id'], $_POST['username'], $_POST['password_hash']);
+    } elseif (isset($_POST['delete_user'])) {
+        $user->deleteUser($_POST['user_id']);
     }
     header("Location: manage_users.php");
     exit;
 }
 
-// DELETE USER
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_user'])) {
-    $id = $_POST['user_id'];
-    $stmt = $conn->prepare("DELETE FROM users WHERE user_id = ?");
-    $stmt->execute([$id]);
-    header("Location: manage_users.php");
-    exit;
-}
+// Fetch all users
+$users = $user->getAllUsers();
 
-// Fetch users
-$users = $conn->query("SELECT user_id, username FROM users")->fetchAll(PDO::FETCH_ASSOC);
 ?>
 
 <!DOCTYPE html>
