@@ -61,7 +61,7 @@ $households = $household->getAll();
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
-        $(document).ready(function () {
+        $(document).ready(function() {
             $('#householdTable').DataTable();
         });
 
@@ -83,7 +83,7 @@ $households = $household->getAll();
         }
 
         // SweetAlert for success/error message
-        $(document).ready(function () {
+        $(document).ready(function() {
             <?php if ($message): ?>
                 Swal.fire({
                     title: '<?= $message === "✅ Household added successfully!" || $message === "✅ Household updated successfully!" ? "Success!" : "Error!" ?>',
@@ -119,14 +119,23 @@ $households = $household->getAll();
         <h2 class="mb-4 text-center">🏠 No Poverty Tracker - Household Management</h2>
 
         <!-- Button to trigger modal -->
-        <button class="btn btn-primary mb-4" data-bs-toggle="modal" data-bs-target="#addHouseholdModal">+ Add Household</button>
 
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="mb-0">🧑 Household List</h2>
+            <div>
+                <a href="index.php" class="btn btn-secondary me-2">← Back to Home</a>
+                <button class="btn btn-primary mb-4" data-bs-toggle="modal" data-bs-target="#addHouseholdModal">+ Add Household</button>
+            </div>
+        </div>
+        
+        
         <!-- Modal Form for Adding Household -->
         <div class="modal fade" id="addHouseholdModal" tabindex="-1" aria-labelledby="addHouseholdModalLabel" aria-hidden="true">
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title" id="addHouseholdModalLabel">Add New Household</h5>
+
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">

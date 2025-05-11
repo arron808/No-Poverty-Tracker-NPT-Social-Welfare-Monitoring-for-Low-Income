@@ -1,5 +1,4 @@
 <?php
-session_start();
 require_once 'auth.php';
 require_once 'database.php';
 require_once 'enrollment.php';
@@ -66,10 +65,14 @@ $enrollments = $enrollment->getAll();
 
 <body class="bg-light">
     <div class="container mt-5">
-        <h2 class="mb-4 text-center">🏠 Enroll Household to Program</h2>
 
-        <div class="text-end mb-3">
-            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#enrollModal">➕ Enroll</button>
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="mb-0">Enroll Household to Program</h2>
+            <div>
+                <a href="index.php" class="btn btn-secondary me-2">← Back to Home</a>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#enrollModal">➕ Enroll</button>
+            </div>
         </div>
 
         <!-- Enroll Modal -->
